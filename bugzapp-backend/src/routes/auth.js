@@ -2,6 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { pool } from "../db/pool.js";
+import { authenticate } from "../middleware/authMiddleware.js";
 
 const router = Router();
 
@@ -63,6 +64,21 @@ router.post("/login", async (req, res) => {
     // don’t expose password_hash
     delete user.password_hash;
     res.json({ user, token });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
+router.get("/me", authenticate, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, name, email, role, created_at
+       FROM users WHERE id = $1`,
+      [req.user.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: "User not found" });
+    res.json(rows[0]);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
