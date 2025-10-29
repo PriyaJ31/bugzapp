@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { pool } from "./db/pool.js";
 import bugsRouter from "./routes/bugs.js";
 import usersRouter from "./routes/users.js";
+import authRouter from "./routes/auth.js";
 
 dotenv.config();
 const app = express();
@@ -21,8 +22,10 @@ app.get("/health", async (_req, res) => {
   }
 });
 
+app.use("/api/auth", authRouter);
 app.use("/api/bugs", bugsRouter);
 app.use("/api/users", usersRouter);
+
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Server running on ${port}`));
